@@ -3,12 +3,13 @@ import sys
 
 ROJO = (255, 0, 0)
 AZUL = (0, 0, 255)
+ANCHO_PANTALLA = 800
+ALTO_PANTALLA = 600
 
 pg.init()
 ping = pg.mixer.Sound('sonidos/ping.wav')
 
-pantalla = pg.display.set_mode((800, 600))
-
+pantalla = pg.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 
 ancho_bola = 10
 
@@ -25,6 +26,23 @@ velocidadY = 5
 velocidadX1 = 7
 velocidadY1 = -5
 
+'''
+Funciones genericas control gráfico
+'''
+
+def choque_bordes_X(x, w):
+    if x > ANCHO_PANTALLA-w or x < w:
+        ping.play()
+        return -1
+    return 1
+
+def choque_bordes_Y(y, h):
+    if y > ALTO_PANTALLA-h or y < h:
+        ping.play()
+        return -1
+    return 1
+
+
 game_over = False
 while not game_over:
     for evento in pg.event.get():
@@ -32,21 +50,10 @@ while not game_over:
             print("Fin")
             game_over = True
 
-    if x > 800-ancho_bola or x < ancho_bola:
-        velocidadX = -velocidadX
-        ping.play()
-
-    if x1 > 800-ancho_bola or x1 < ancho_bola:
-        velocidadX1 = -velocidadX1
-        ping.play()
-        
-    if y > 600-ancho_bola or y < ancho_bola:
-        velocidadY = -velocidadY
-        ping.play()
-        
-    if y1 > 600-ancho_bola or y1 < ancho_bola:
-        velocidadY1 = -velocidadY1
-        ping.play()
+    velocidadX *= choque_bordes_X(x, ancho_bola)
+    velocidadY *= choque_bordes_Y(y, ancho_bola)
+    velocidadX1 *= choque_bordes_X(x1, ancho_bola)
+    velocidadY1 *= choque_bordes_Y(y1, ancho_bola)
 
     y += velocidadY
     x += velocidadX
