@@ -3,6 +3,8 @@ import sys
 
 ROJO = (255, 0, 0)
 AZUL = (0, 0, 255)
+VERDE = (0, 255, 0)
+
 ANCHO_PANTALLA = 800
 ALTO_PANTALLA = 600
 
@@ -19,12 +21,8 @@ y = (600-20)//2
 x1 = ancho_bola
 y1 = ancho_bola
 
-color = ROJO
-color1 = (0, 255, 0)
-velocidadX = 5
-velocidadY = 5
-velocidadX1 = 7
-velocidadY1 = -5
+bolas = [{'x': 400, 'y': 300, 'color': ROJO, 'vx': 5, 'vy': 5},
+         {'x': ancho_bola, 'y': ancho_bola, 'color': VERDE, 'vx': 7, 'vy': 5}]
 
 '''
 Funciones genericas control gráfico
@@ -50,19 +48,18 @@ while not game_over:
             print("Fin")
             game_over = True
 
-    velocidadX *= choque_bordes_X(x, ancho_bola)
-    velocidadY *= choque_bordes_Y(y, ancho_bola)
-    velocidadX1 *= choque_bordes_X(x1, ancho_bola)
-    velocidadY1 *= choque_bordes_Y(y1, ancho_bola)
+    for bola in bolas:
+        bola['vx'] *= choque_bordes_X(bola['x'], ancho_bola)
+        bola['x'] += bola['vx']
+        bola['vy'] *= choque_bordes_Y(bola['y'], ancho_bola)
+        bola['y'] += bola['vy']
+        print(bola)
 
-    y += velocidadY
-    x += velocidadX
-    y1 += velocidadY1
-    x1 += velocidadX1
 
     pantalla.fill(AZUL)
-    pg.draw.circle(pantalla, color, (x, y), ancho_bola)
-    pg.draw.circle(pantalla, color1, (x1, y1), ancho_bola)
+    for bola in bolas:
+        pg.draw.circle(pantalla, bola['color'], (bola['x'], bola['y']), ancho_bola)
+
     pg.display.flip()
 
 pg.quit()
