@@ -1,5 +1,6 @@
 import pygame as pg
 import sys
+from random import randrange
 
 ROJO = (255, 0, 0)
 AZUL = (0, 0, 255)
@@ -21,8 +22,16 @@ y = (600-20)//2
 x1 = ancho_bola
 y1 = ancho_bola
 
-bolas = [{'x': 400, 'y': 300, 'color': ROJO, 'vx': 5, 'vy': 5},
-         {'x': ancho_bola, 'y': ancho_bola, 'color': VERDE, 'vx': 7, 'vy': 5}]
+bolas = []
+for i in range(randrange(5,25)):
+    bolas.append({  'x': randrange(ancho_bola, ANCHO_PANTALLA-ancho_bola),
+                    'y': randrange(ancho_bola, ALTO_PANTALLA-ancho_bola),
+                    'vx': randrange(5, 11), 'vy': randrange(5, 11),
+                    'color': (randrange(256), randrange(256), randrange(256))
+    })
+
+
+
 
 '''
 Funciones genericas control gráfico
