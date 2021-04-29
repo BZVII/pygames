@@ -36,24 +36,31 @@ class Bola():
         if self.x <=0 or self.x >=ANCHO:
             self.vx = -self.vx
 
-    '''
-        bola.dibujar(pantalla)
-        #pg.draw.circle(pantalla, bola.color, (bola.x, bola.y), 10)
-    '''
     def dibujar(self, lienzo):
         pg.draw.circle(lienzo, self.color, (self.x, self.y), self.radio)
 
 
+class Raqueta():
+    def __init__(self, x=0, y=0):
+        self.altura = 10
+        self.anchura = 250
+        self.color = (255, 255, 255)
+        self.x = (ANCHO + self.anchura) // 2
+        self.y = ALTO - self.altura
 
-bolas = []
-for _ in range(10):
-    bola = Bola(randint(0, ANCHO),
-                randint(0, ALTO),
-                randint(5, 10)*choice([-1, 1]),
-                randint(5, 10)*choice([-1, 1]),
-                (randint(0, 255), randint(0,255), randint(0,255)))
+    def dibujar(self, lienzo):
+        rect = pg.Rect(self.x, self.y, self.anchura, self.altura)
+        pg.draw.rect(lienzo, self.color, rect)
 
-    bolas.append(bola)
+
+
+bola = Bola(randint(0, ANCHO),
+            randint(0, ALTO),
+            randint(5, 10)*choice([-1, 1]),
+            randint(5, 10)*choice([-1, 1]),
+            (randint(0, 255), randint(0,255), randint(0,255)))
+
+raqueta = Raqueta()
 
 game_over = False
 while not game_over:
@@ -64,14 +71,12 @@ while not game_over:
             game_over = True
 
     # Modificación de estado
-    for bola in bolas:
-        bola.actualizar()
+    bola.actualizar()
 
     # Gestión de la pantalla
     pantalla.fill(NEGRO)
-    for bola in bolas:
-        bola.dibujar(pantalla)
-        #pg.draw.circle(pantalla, bola.color, (bola.x, bola.y), 10)
+    bola.dibujar(pantalla)
+    raqueta.dibujar(pantalla)
 
 
     pg.display.flip()
