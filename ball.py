@@ -10,7 +10,7 @@ ROJO = (255, 0, 0)
 AZUL = (0, 0, 255)
 VERDE = (0, 255, 0)
 NEGRO = (0, 0, 0)
-ANCHO = 800
+ANCHO = 80
 ALTO = 600
 
 pg.init()
@@ -64,6 +64,10 @@ class Bola():
 
         if choqueX and choqueY:
             self.vy *= -1
+            return True
+
+        return False
+
 
 
 class Raqueta():
@@ -90,6 +94,7 @@ class Raqueta():
 
 
 vidas = 3
+puntuacion = 0
 bola = Bola(randint(0, ANCHO),
             randint(0, ALTO),
             randint(5, 10)*choice([-1, 1]),
@@ -98,30 +103,47 @@ bola = Bola(randint(0, ANCHO),
 
 raqueta = Raqueta()
 
+txtGameOver = pg.font.SysFont("Arial", 35)
+txtPuntuacion = pg.font.SysFont("Courier", 28)
+pierdebola = False
 game_over = False
 while not game_over and vidas > 0:
     v = reloj.tick(60)
+    if pierdebola:
+        pg.time.delay(500)
+
     #Gestion de eventos
     for evento in pg.event.get():
         if evento.type == pg.QUIT:
             game_over = True
-
     # Modificación de estado
     raqueta.actualizar()
     pierdebola = bola.actualizar()
+    pantalla.fill(NEGRO)
     if pierdebola:
         vidas -= 1
-    bola.comprueba_colision(raqueta)
+        if vidas == 0:
+            texto = txtGameOver.render("GAME_OVER", True, (0, 255, 255))
+            pantalla.blit(texto, (400, 300))
+        else:
+            bola.x = 400
+            bola.y = 300
+            bola.dibujar(pantalla)
+            raqueta.dibujar(pantalla)
+    else:
+        if bola.comprueba_colision(raqueta):
+            puntuacion += 5
+            
 
-    # Gestión de la pantalla
-    pantalla.fill(NEGRO)
-    bola.dibujar(pantalla)
-    raqueta.dibujar(pantalla)
-
+        # Gestión de la pantalla
+        texto = txtPuntuacion.render(str(puntuacion), True, (255,255,0))
+        pantalla.blit(texto, (20, 20))
+        bola.dibujar(pantalla)
+        raqueta.dibujar(pantalla)
 
     pg.display.flip()
-    if pierdebola:
-        pg.time.delay(500)
+
+pg.time.delay(1000)
 
 pg.quit()
 sys.exit()
