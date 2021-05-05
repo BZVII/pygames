@@ -15,18 +15,30 @@ class Marcador(pg.sprite.Sprite):
         self.image = self.fuente.render(str(self.text), True, self.color)
         self.rect = self.image.get_rect(topleft=(x,y))
 
-    def update(self):
+    def update(self, dt):
         self.image = self.fuente.render(str(self.text), True, self.color)
 
 class Raqueta(pg.sprite.Sprite):
-    def __init__(self, x, y, w=100, h=30):
+    disfraces = ['electric00.png', 'electric01.png', 'electric02.png']
+
+    def __init__(self, x, y):
         super().__init__()
-        self.image = pg.Surface((w, h), pg.SRCALPHA, 32)
-        pg.draw.rect(self.image, (255,0,0), pg.Rect(0,0,w,h))
+        self.imagenes = self.cargaImagenes()
+        self.imagen_actual = 0
+        self.milisegundos_para_cambiar = 1000 // FPS * 5
+        self.milisegundos_acumulados = 0
+        self.image = self.imagenes[self.imagen_actual]
+
         self.rect = self.image.get_rect(centerx = x, bottom = y)
         self.vx = 7
 
-    def update(self):
+    def cargaImagenes(self):
+        imagenes = []
+        for fichero in self.disfraces:
+            imagenes.append(pg.image.load("./images/{}".format(fichero)))
+        return imagenes
+
+    def update(self, dt):
         teclas_pulsadas = pg.key.get_pressed()
         if teclas_pulsadas[pg.K_LEFT]:
             self.rect.x -= self.vx
@@ -38,6 +50,14 @@ class Raqueta(pg.sprite.Sprite):
             self.rect.left = 0
         if self.rect.right >= ANCHO:
             self.rect.right = ANCHO
+
+        self.milisegundos_acumulados += dt
+        if self.milisegundos_acumulados >= self.milisegundos_para_cambiar:
+            self.imagen_actual += 1
+            if self.imagen_actual >= len(self.disfraces):
+                self.imagen_actual = 0
+            self.milisegundos_acumulados = 0
+        self.image = self.imagenes[self.imagen_actual]
             
 
 class Bola(pg.sprite.Sprite):
@@ -50,7 +70,7 @@ class Bola(pg.sprite.Sprite):
         self.vy = random.randint(5, 10) * random.choice([-1, 1])
 
 
-    def update(self):
+    def update(self, dt):
         self.rect.x += self.vx
         self.rect.y += self.vy
 
@@ -93,7 +113,7 @@ class Game():
                     game_over = True
 
             self.cuentaSegundos.text = segundero
-            self.todoGrupo.update()
+            self.todoGrupo.update(dt)
 
             self.pantalla.fill((0,0,0))
             self.todoGrupo.draw(self.pantalla)
