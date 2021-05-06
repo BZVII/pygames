@@ -61,6 +61,30 @@ class MarcadorH(pg.sprite.Sprite):
 class CuentaVidas(MarcadorH):
     plantilla = "Vidas: {}"
 
+class Ladrillo(pg.sprite.Sprite):
+    disfraces = ['greenTile.png', 'redTile.png', 'redTileBreak.png']
+
+    def __init__(self, x, y, esDuro=False):
+        super().__init__()
+        self.imagenes = self.cargaImagenes()
+        self.esDuro = esDuro
+        self.imagen_actual = 1 if self.esDuro else 0
+        self.image = self.imagenes[self.imagen_actual]
+        self.rect = self.image.get_rect(topleft=(x,y))
+        self.numGolpes = 0
+
+    def cargaImagenes(self):
+        imagenes = []
+        for fichero in self.disfraces:
+            imagenes.append(pg.image.load("./images/{}".format(fichero)))
+        return imagenes
+
+    def update(self, dt):
+        if self.esDuro and self.numGolpes == 1:
+            self.imagen_actual = 2
+            self.image = self.imagenes[self.imagen_actual]
+
+
 
 class Raqueta(pg.sprite.Sprite):
     disfraces = ['electric00.png', 'electric01.png', 'electric02.png']
@@ -175,9 +199,15 @@ class Game():
         self.grupoJugador = pg.sprite.Group()
         self.grupoLadrillos = pg.sprite.Group()
 
+        for fila in range(4):
+            for columna in range(8):
+                x = columna * 100 + 5
+                y = fila * 40 + 5
+                ladrillo = Ladrillo(x, y)
+                self.grupoLadrillos.add(ladrillo)
+
         self.cuentaSegundos = MarcadorH(10,10, fontsize=50)
         self.cuentaVidas = CuentaVidas(790, 10, "topright", 50, (255, 255, 0))
-        self.todoGrupo.add(self.cuentaSegundos, self.cuentaVidas)
         self.fondo = pg.image.load("./images/background.png")
 
         self.bola = Bola(ANCHO // 2, ALTO // 2)
@@ -187,6 +217,7 @@ class Game():
         self.grupoJugador.add(self.raqueta)
 
         self.todoGrupo.add(self.grupoJugador, self.grupoLadrillos)
+        self.todoGrupo.add(self.cuentaSegundos, self.cuentaVidas)
 
 
     def bucle_principal(self):
