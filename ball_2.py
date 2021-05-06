@@ -26,14 +26,8 @@ class Marcador(pg.sprite.Sprite):
         else:
             self.justificado = justificado
 
-        self.image = self.fuente.render(str(self.text), True, self.color)
-
-        if self.justificado == Marcador.Justificado.izquierda:
-            self.rect = self.image.get_rect(topleft=(x,y))
-        elif self.justificado == Marcador.Justificado.derecha:
-            self.rect = self.image.get_rect(topright=(x,y))
-        else:
-            self.rect = self.image.get_rect(midtop=(x,y))
+        self.image = None
+        self.rect = None
 
     def update(self, dt):
         self.image = self.fuente.render(str(self.text), True, self.color)
@@ -45,22 +39,28 @@ class Marcador(pg.sprite.Sprite):
             self.rect = self.image.get_rect(midtop=(self.x, self.y))
 
 class MarcadorH(pg.sprite.Sprite):
+    plantilla = "{}"
 
     def __init__(self, x, y, justificado = "topleft", fontsize=25, color=(255,255,255)):
         super().__init__()
         self.fuente = pg.font.Font(None, fontsize)
-        self.text = "0"
+        self.text = ""
         self.color = color
         self.x = x
         self.y = y
         self.justificado = justificado
-        self.image = self.fuente.render(str(self.text), True, self.color)
+        self.image = None
+        self.rect = None
 
 
     def update(self, dt):
-        self.image = self.fuente.render(str(self.text), True, self.color)
+        self.image = self.fuente.render(self.plantilla.format(self.text), True, self.color)
         d = {self.justificado: (self.x, self.y)}
         self.rect = self.image.get_rect(**d)
+
+class CuentaVidas(MarcadorH):
+    plantilla = "Vidas: {}"
+
 
 class Raqueta(pg.sprite.Sprite):
     disfraces = ['electric00.png', 'electric01.png', 'electric02.png']
@@ -170,14 +170,15 @@ class Bola(pg.sprite.Sprite):
 class Game():
     def __init__(self):
         self.pantalla = pg.display.set_mode((ANCHO, ALTO))
-        self.vidas = 9999
+        self.vidas = 3
         self.todoGrupo = pg.sprite.Group()
         self.grupoJugador = pg.sprite.Group()
         self.grupoLadrillos = pg.sprite.Group()
 
-        self.cuentaSegundos = Marcador(10,10)
-        self.cuentaVidas = MarcadorH(790, 10, "midtop", 50)
+        self.cuentaSegundos = MarcadorH(10,10, fontsize=50)
+        self.cuentaVidas = CuentaVidas(790, 10, "topright", 50, (255, 255, 0))
         self.todoGrupo.add(self.cuentaSegundos, self.cuentaVidas)
+        self.fondo = pg.image.load("./images/background.png")
 
         self.bola = Bola(ANCHO // 2, ALTO // 2)
         self.todoGrupo.add(self.bola)    
@@ -206,13 +207,13 @@ class Game():
                     game_over = True
 
             self.cuentaSegundos.text = segundero
-            self.cuentaVidas.text = self.vidas
+            self.cuentaVidas.text = self.vidas 
             self.bola.prueba_colision(self.grupoJugador)
             self.todoGrupo.update(dt)
             if self.bola.estado == Bola.Estado.muerta:
                 self.vidas -= 1
 
-            self.pantalla.fill((0,0,0))
+            self.pantalla.blit(self.fondo, (0,0))
             self.todoGrupo.draw(self.pantalla)
 
 
