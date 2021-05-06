@@ -84,6 +84,9 @@ class Ladrillo(pg.sprite.Sprite):
             self.imagen_actual = 2
             self.image = self.imagenes[self.imagen_actual]
 
+    def desaparece(self):
+        self.numGolpes += 1
+        return (self.numGolpes > 0 and not self.esDuro) or (self.numGolpes > 1 and self.esDuro)
 
 
 class Raqueta(pg.sprite.Sprite):
@@ -161,6 +164,7 @@ class Bola(pg.sprite.Sprite):
         candidatos = pg.sprite.spritecollide(self, grupo, False)
         if len(candidatos) > 0:
             self.vy *= -1
+        return candidatos
 
     def update(self, dt):
         if self.estado == Bola.Estado.viva:
@@ -195,6 +199,7 @@ class Game():
     def __init__(self):
         self.pantalla = pg.display.set_mode((ANCHO, ALTO))
         self.vidas = 3
+        self.puntuacion = 0
         self.todoGrupo = pg.sprite.Group()
         self.grupoJugador = pg.sprite.Group()
         self.grupoLadrillos = pg.sprite.Group()
@@ -203,10 +208,11 @@ class Game():
             for columna in range(8):
                 x = columna * 100 + 5
                 y = fila * 40 + 5
-                ladrillo = Ladrillo(x, y)
+                esDuro = random.randint(1, 10) == 1
+                ladrillo = Ladrillo(x, y, True)
                 self.grupoLadrillos.add(ladrillo)
 
-        self.cuentaSegundos = MarcadorH(10,10, fontsize=50)
+        self.cuentaPuntos = MarcadorH(10,10, fontsize=50)
         self.cuentaVidas = CuentaVidas(790, 10, "topright", 50, (255, 255, 0))
         self.fondo = pg.image.load("./images/background.png")
 
@@ -217,29 +223,31 @@ class Game():
         self.grupoJugador.add(self.raqueta)
 
         self.todoGrupo.add(self.grupoJugador, self.grupoLadrillos)
-        self.todoGrupo.add(self.cuentaSegundos, self.cuentaVidas)
+        self.todoGrupo.add(self.cuentaPuntos, self.cuentaVidas)
 
 
     def bucle_principal(self):
         game_over = False
         reloj = pg.time.Clock()
-        contador_milisegundos = 0
-        segundero = 0
         while not game_over and self.vidas > 0: 
             dt = reloj.tick(FPS)
-            contador_milisegundos += dt
-
-            if contador_milisegundos >= 1000:
-                segundero += 1
-                contador_milisegundos = 0
 
             for evento in pg.event.get():
                 if evento.type == pg.QUIT:
                     game_over = True
 
-            self.cuentaSegundos.text = segundero
+            self.cuentaPuntos.text = self.puntuacion
             self.cuentaVidas.text = self.vidas 
             self.bola.prueba_colision(self.grupoJugador)
+            tocados = self.bola.prueba_colision(self.grupoLadrillos)
+            for ladrillo in tocados:
+                self.puntuacion += 5
+                if ladrillo.desaparece():
+                    self.grupoLadrillos.remove(ladrillo)
+                    self.todoGrupo.remove(ladrillo)
+
+
+
             self.todoGrupo.update(dt)
             if self.bola.estado == Bola.Estado.muerta:
                 self.vidas -= 1
