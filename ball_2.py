@@ -113,9 +113,14 @@ class Raqueta(pg.sprite.Sprite):
         teclas_pulsadas = pg.key.get_pressed()
         if teclas_pulsadas[pg.K_LEFT]:
             self.rect.x -= self.vx
-
-        if teclas_pulsadas[pg.K_RIGHT]:
+            self.vx +=1
+            self.vx = min(self.vx, 15)
+        elif teclas_pulsadas[pg.K_RIGHT]:
             self.rect.x += self.vx
+            self.vx += 1
+            self.vx = min(self.vx, 15)
+        else:
+            self.vx = 7
 
         if self.rect.left <= 0:
             self.rect.left = 0
@@ -209,7 +214,7 @@ class Game():
                 x = columna * 100 + 5
                 y = fila * 40 + 5
                 esDuro = random.randint(1, 10) == 1
-                ladrillo = Ladrillo(x, y, True)
+                ladrillo = Ladrillo(x, y, esDuro)
                 self.grupoLadrillos.add(ladrillo)
 
         self.cuentaPuntos = MarcadorH(10,10, fontsize=50)
